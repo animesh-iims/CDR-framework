@@ -1,0 +1,360 @@
+<h2 class="sr-only">CDR Cluster Suitability Assessment Framework for ERW and Biochar — Interactive Scoring Tool</h2>
+
+<style>
+.tab-btn{padding:5px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;font-size:12px;font-weight:500;transition:all .15s}
+.tab-btn.active{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info)}
+.mod-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 14px}
+.mod-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:7px}
+.mod-name{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.mod-wt{font-size:10px;color:var(--color-text-tertiary)}
+.crit-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-top:0.5px solid var(--color-border-tertiary)}
+.crit-lbl{font-size:11px;color:var(--color-text-secondary);flex:1;min-width:0;line-height:1.3}
+.r-btns{display:flex;gap:2px;flex-shrink:0}
+.r-btn{width:22px;height:22px;border-radius:50%;border:0.5px solid var(--color-border-secondary);background:transparent;cursor:pointer;font-size:10px;color:var(--color-text-tertiary);transition:all .1s;display:flex;align-items:center;justify-content:center;padding:0;line-height:1}
+.r-btn.sel{background:var(--color-background-info);border-color:var(--color-border-info);color:var(--color-text-info);font-weight:500}
+.score-track{height:3px;background:var(--color-border-tertiary);border-radius:2px;margin-top:8px}
+.score-fill{height:100%;border-radius:2px;transition:width .3s}
+.badge{display:inline-flex;align-items:center;font-size:11px;padding:3px 9px;border-radius:var(--border-radius-md);font-weight:500}
+.flag{font-size:11px;padding:3px 10px;border-radius:var(--border-radius-md)}
+.ks{font-size:9px;padding:1px 5px;border-radius:var(--border-radius-md);margin-left:4px;vertical-align:middle;background:var(--color-background-warning);color:var(--color-text-warning)}
+</style>
+
+<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px">
+  <div>
+    <p style="font-size:10px;letter-spacing:.06em;color:var(--color-text-tertiary);margin:0 0 3px">CDR DEPLOYMENT · INDIA</p>
+    <p style="font-size:15px;font-weight:500;margin:0;color:var(--color-text-primary)">Cluster suitability framework</p>
+    <p style="font-size:11px;color:var(--color-text-secondary);margin:3px 0 0">Rate each criterion 1 (poor) → 5 (excellent) for the target cluster</p>
+  </div>
+  <div style="display:flex;gap:5px;flex-shrink:0">
+    <button class="tab-btn active" id="tab-erw" onclick="setMode('erw')">ERW</button>
+    <button class="tab-btn" id="tab-bc" onclick="setMode('biochar')">Biochar</button>
+    <button class="tab-btn" onclick="resetAll()" style="color:var(--color-text-tertiary)">Reset</button>
+  </div>
+</div>
+
+<div id="mgrid" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px"></div>
+
+<div style="margin-top:12px;background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:14px 16px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div>
+      <span style="font-size:12px;font-weight:500;color:var(--color-text-primary)">Overall cluster suitability</span>
+      <span id="coverage" style="font-size:10px;color:var(--color-text-tertiary);margin-left:8px"></span>
+    </div>
+    <span id="tier-badge" class="badge" style="background:var(--color-background-secondary);color:var(--color-text-secondary)">Rate criteria to score</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="flex:1;height:6px;background:var(--color-border-tertiary);border-radius:3px;overflow:hidden">
+      <div id="overall-bar" style="height:100%;width:0%;border-radius:3px;transition:width .4s"></div>
+    </div>
+    <span id="overall-num" style="font-size:22px;font-weight:500;min-width:40px;text-align:right;color:var(--color-text-primary)">—</span>
+  </div>
+  <div id="mod-bd" style="margin-top:12px;display:grid;grid-template-columns:repeat(8,1fr);gap:4px"></div>
+  <div id="flags-area" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px"></div>
+</div>
+
+<div style="margin-top:10px;display:flex;gap:14px;flex-wrap:wrap;align-items:center">
+  <span style="font-size:10px;color:var(--color-text-tertiary)">Tiers:</span>
+  <span style="font-size:10px;color:var(--color-text-success)">● 4.0–5.0 High priority</span>
+  <span style="font-size:10px;color:var(--color-text-warning)">● 3.0–3.9 Moderate</span>
+  <span style="font-size:10px;color:var(--color-text-warning)">● 2.0–2.9 Conditional</span>
+  <span style="font-size:10px;color:var(--color-text-danger)">● 1.0–1.9 Not viable</span>
+  <span style="font-size:10px;color:var(--color-text-tertiary)">★ knockout criterion</span>
+</div>
+
+<script>
+const M = {
+  geo:{
+    name:'Geophysical',
+    w:{erw:20,biochar:12},
+    col:{erw:'#1D9E75',biochar:'#BA7517'},
+    c:{
+      erw:[
+        {id:'basalt',lbl:'Basalt / silicate rock proximity (<100 km)',k:true},
+        {id:'ph',lbl:'Soil acidity — lower pH = higher uplift potential'},
+        {id:'texture',lbl:'Soil texture (loam/clay favoured for ERW)'},
+        {id:'depletion',lbl:'Severity of existing mineral depletion'},
+      ],
+      biochar:[
+        {id:'feedstock',lbl:'Biomass feedstock availability & type',k:true},
+        {id:'som',lbl:'Soil organic matter deficit severity'},
+        {id:'texture',lbl:'Soil texture (coarser soils benefit more)'},
+        {id:'pyro',lbl:'Pyrolysis infrastructure proximity'},
+      ]
+    }
+  },
+  climate:{
+    name:'Climatic',
+    w:{erw:15,biochar:10},
+    col:{erw:'#378ADD',biochar:'#378ADD'},
+    c:{
+      erw:[
+        {id:'rain',lbl:'Annual rainfall (>800 mm optimal)',k:true},
+        {id:'temp',lbl:'Temperature (warmer = faster weathering)'},
+        {id:'monsoon',lbl:'Monsoon reliability & seasonal distribution'},
+      ],
+      biochar:[
+        {id:'drought',lbl:'Drought / moisture stress frequency (higher = more benefit)'},
+        {id:'season',lbl:'Growing season length & multi-season potential'},
+        {id:'extremes',lbl:'Climate variability & extreme event exposure'},
+      ]
+    }
+  },
+  agro:{
+    name:'Agronomic',
+    w:{erw:15,biochar:15},
+    col:{erw:'#639922',biochar:'#639922'},
+    c:{
+      erw:[
+        {id:'crops',lbl:'Crop compatibility — paddy, tea, spices ranked highest'},
+        {id:'yieldgap',lbl:'Yield gap vs achievable potential'},
+        {id:'degrad',lbl:'Soil degradation & fertility decline severity'},
+        {id:'inputs',lbl:'Fertiliser / input dependency (higher = stronger ROI case)'},
+      ],
+      biochar:[
+        {id:'crops',lbl:'Crop response profile — paddy, pulses, horticulture'},
+        {id:'yieldgap',lbl:'Yield gap vs achievable potential'},
+        {id:'degrad',lbl:'Soil health severity (compaction, low OM)'},
+        {id:'multi',lbl:'Multi-cropping intensity & season overlap'},
+      ]
+    }
+  },
+  econ:{
+    name:'Farmer economics',
+    w:{erw:20,biochar:22},
+    col:{erw:'#BA7517',biochar:'#BA7517'},
+    c:{
+      erw:[
+        {id:'income',lbl:'HH income relative to national median (₹13,661/mo)'},
+        {id:'debt',lbl:'Debt burden — score inverse (low debt = high score)'},
+        {id:'roi',lbl:'Near-term ROI visibility within 1–2 seasons'},
+        {id:'holding',lbl:'Avg holding size & cluster aggregation potential'},
+        {id:'adopt',lbl:'Historical openness to new agronomic practices'},
+      ],
+      biochar:[
+        {id:'income',lbl:'HH income relative to national median'},
+        {id:'debt',lbl:'Debt burden — inverse score (low debt = 5)'},
+        {id:'roi',lbl:'Near-term soil improvement ROI visibility'},
+        {id:'holding',lbl:'Holding size & FPO aggregation density'},
+        {id:'adopt',lbl:'Historical openness to new practices'},
+      ]
+    }
+  },
+  inst:{
+    name:'Institutional',
+    w:{erw:15,biochar:16},
+    col:{erw:'#7F77DD',biochar:'#7F77DD'},
+    c:{
+      erw:[
+        {id:'fpo',lbl:'FPO presence, operational strength & last-mile reach',k:true},
+        {id:'govt',lbl:'Govt scheme alignment (PM-KISAN, soil health card, etc.)'},
+        {id:'ext',lbl:'Extension service density & demonstrated quality'},
+        {id:'credit',lbl:'Credit / microfinance access for smallholders'},
+      ],
+      biochar:[
+        {id:'fpo',lbl:'FPO aggregation capacity & trust with farmers',k:true},
+        {id:'govt',lbl:'Govt scheme alignment & procurement linkages'},
+        {id:'ext',lbl:'Extension service density & quality'},
+        {id:'prior',lbl:'Prior CDR / sustainability project experience in cluster'},
+      ]
+    }
+  },
+  ops:{
+    name:'Operational',
+    w:{erw:8,biochar:12},
+    col:{erw:'#D85A30',biochar:'#D85A30'},
+    c:{
+      erw:[
+        {id:'supply',lbl:'Input supply chain — quarry to farm logistics'},
+        {id:'roads',lbl:'Road & transport infrastructure quality'},
+        {id:'equip',lbl:'Spreading / application equipment availability'},
+        {id:'storage',lbl:'On-farm / warehouse storage capacity'},
+      ],
+      biochar:[
+        {id:'feedlog',lbl:'Feedstock collection & aggregation logistics'},
+        {id:'pyrounit',lbl:'Kiln / pyrolysis unit availability or proximity'},
+        {id:'roads',lbl:'Road & transport infrastructure quality'},
+        {id:'equip',lbl:'Application equipment availability'},
+      ]
+    }
+  },
+  mrv:{
+    name:'MRV',
+    w:{erw:4,biochar:6},
+    col:{erw:'#D4537E',biochar:'#D4537E'},
+    c:{
+      erw:[
+        {id:'baseline',lbl:'Soil baseline data availability & quality'},
+        {id:'remote',lbl:'Remote sensing / satellite coverage density'},
+        {id:'capacity',lbl:'Local technical capacity for field MRV'},
+        {id:'registry',lbl:'Registry / protocol alignment (Puro, Isometric, etc.)'},
+      ],
+      biochar:[
+        {id:'baseline',lbl:'Soil baseline & production tracking data'},
+        {id:'tracking',lbl:'Feedstock & char mass balance traceability'},
+        {id:'capacity',lbl:'Local MRV and sampling capacity'},
+        {id:'perm',lbl:'Permanence / stability verification feasibility'},
+      ]
+    }
+  },
+  market:{
+    name:'Carbon market',
+    w:{erw:3,biochar:7},
+    col:{erw:'#888780',biochar:'#5F5E5A'},
+    c:{
+      erw:[
+        {id:'demand',lbl:'Offtake / buyer demand for ERW credits'},
+        {id:'add',lbl:'Additionality & baseline risk clarity'},
+        {id:'cobenefit',lbl:'Co-benefit stacking potential (water, biodiversity)'},
+      ],
+      biochar:[
+        {id:'demand',lbl:'Offtake demand for high-permanence biochar credits'},
+        {id:'perm',lbl:'Carbon permanence rating strength (centuries advantage)'},
+        {id:'cobenefit',lbl:'Local / soil use co-benefit & revenue stacking'},
+      ]
+    }
+  }
+};
+
+const MK=['geo','climate','agro','econ','inst','ops','mrv','market'];
+let mode='erw';
+let R={erw:{},biochar:{}};
+
+function setMode(m){
+  mode=m;
+  document.getElementById('tab-erw').classList.toggle('active',m==='erw');
+  document.getElementById('tab-bc').classList.toggle('active',m==='biochar');
+  renderGrid();calcAll();
+}
+
+function rate(mk,cid,val){
+  if(!R[mode][mk])R[mode][mk]={};
+  R[mode][mk][cid]=val;
+  renderCard(mk);calcAll();
+}
+
+function resetAll(){
+  R[mode]={};renderGrid();calcAll();
+}
+
+function modAvg(mk){
+  const crits=M[mk].c[mode];
+  const r=R[mode][mk]||{};
+  const vals=crits.map(c=>r[c.id]||0).filter(v=>v>0);
+  if(!vals.length)return 0;
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
+}
+
+function renderCard(mk){
+  const mod=M[mk];
+  const crits=mod.c[mode];
+  const w=mod.w[mode];
+  const col=mod.col[mode];
+  const r=R[mode][mk]||{};
+  const avg=modAvg(mk);
+  const pct=avg>0?((avg-1)/4)*100:0;
+
+  let rows=crits.map(c=>{
+    const cur=r[c.id]||0;
+    const btns=[1,2,3,4,5].map(n=>`<button class="r-btn${cur===n?' sel':''}" onclick="rate('${mk}','${c.id}',${n})">${n}</button>`).join('');
+    const ks=c.k?`<span class="ks">★</span>`:'';
+    return `<div class="crit-row"><span class="crit-lbl">${c.lbl}${ks}</span><div class="r-btns">${btns}</div></div>`;
+  }).join('');
+
+  const card=document.getElementById('card-'+mk);
+  if(!card)return;
+  card.innerHTML=`
+    <div class="mod-head">
+      <span class="mod-name">${mod.name}</span>
+      <span class="mod-wt">wt: ${w}%</span>
+    </div>
+    ${rows}
+    <div class="score-track"><div class="score-fill" style="width:${pct.toFixed(1)}%;background:${col}"></div></div>
+    <div style="text-align:right;font-size:10px;color:var(--color-text-tertiary);margin-top:2px">${avg>0?avg.toFixed(1)+' / 5':'—'}</div>
+  `;
+}
+
+function renderGrid(){
+  const g=document.getElementById('mgrid');
+  g.innerHTML=MK.map(mk=>`<div class="mod-card" id="card-${mk}"></div>`).join('');
+  MK.forEach(mk=>renderCard(mk));
+}
+
+function calcAll(){
+  let wSum=0,rSum=0,wTotal=0;
+  const kFails=[];
+  MK.forEach(mk=>{
+    const avg=modAvg(mk);
+    const w=M[mk].w[mode];
+    wTotal+=w;
+    if(avg>0){wSum+=avg*w;rSum+=w;}
+    M[mk].c[mode].forEach(c=>{
+      if(c.k&&R[mode][mk]?.[c.id]&&R[mode][mk][c.id]<=2){
+        kFails.push(c.lbl.split('—')[0].trim().replace(' (',''));
+      }
+    });
+  });
+
+  const bd=document.getElementById('mod-bd');
+  bd.innerHTML=MK.map(mk=>{
+    const avg=modAvg(mk);
+    const col=M[mk].col[mode];
+    const pct=avg>0?Math.round(((avg-1)/4)*100):0;
+    return `<div style="text-align:center">
+      <div style="font-size:9px;color:var(--color-text-tertiary);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${M[mk].name}</div>
+      <div style="height:3px;background:var(--color-border-tertiary);border-radius:2px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${col};border-radius:2px;transition:width .3s"></div>
+      </div>
+      <div style="font-size:9px;color:var(--color-text-secondary);margin-top:2px">${avg>0?avg.toFixed(1):'—'}</div>
+    </div>`;
+  }).join('');
+
+  const bar=document.getElementById('overall-bar');
+  const numEl=document.getElementById('overall-num');
+  const tierEl=document.getElementById('tier-badge');
+  const cov=document.getElementById('coverage');
+  const fa=document.getElementById('flags-area');
+
+  if(rSum===0){
+    bar.style.width='0%';
+    numEl.textContent='—';
+    tierEl.textContent='Rate criteria to score';
+    tierEl.style.background='var(--color-background-secondary)';
+    tierEl.style.color='var(--color-text-secondary)';
+    cov.textContent='';fa.innerHTML='';return;
+  }
+
+  const score=wSum/rSum;
+  const pct=((score-1)/4)*100;
+  bar.style.width=pct.toFixed(1)+'%';
+  numEl.textContent=score.toFixed(1);
+  cov.textContent=Math.round((rSum/wTotal)*100)+'% rated';
+
+  let tier,bc,tc,ac;
+  if(score>=4){tier='High priority';bc='var(--color-background-success)';tc='var(--color-text-success)';ac='#1D9E75';}
+  else if(score>=3){tier='Moderate priority';bc='var(--color-background-warning)';tc='var(--color-text-warning)';ac='#BA7517';}
+  else if(score>=2){tier='Conditional';bc='var(--color-background-warning)';tc='var(--color-text-warning)';ac='#D85A30';}
+  else{tier='Not viable';bc='var(--color-background-danger)';tc='var(--color-text-danger)';ac='#E24B4A';}
+
+  bar.style.background=ac;
+  tierEl.textContent=tier;
+  tierEl.style.background=bc;
+  tierEl.style.color=tc;
+
+  let fh='';
+  kFails.forEach(lbl=>{
+    fh+=`<span class="flag" style="background:var(--color-background-danger);color:var(--color-text-danger)">⚠ Knockout ≤2: ${lbl}</span>`;
+  });
+
+  const econ=modAvg('econ'),inst=modAvg('inst'),geo=modAvg('geo'),ops=modAvg('ops');
+  if(!kFails.length){
+    if(econ>0&&econ<2.5)fh+=`<span class="flag" style="background:var(--color-background-warning);color:var(--color-text-warning)">Farmer risk: direct subsidy or risk-sharing required</span>`;
+    if(inst>0&&inst<2.5)fh+=`<span class="flag" style="background:var(--color-background-warning);color:var(--color-text-warning)">Institutional gap: FPO-building must precede deployment</span>`;
+    if(ops>0&&ops<2.5)fh+=`<span class="flag" style="background:var(--color-background-warning);color:var(--color-text-warning)">Operational bottleneck: address supply chain before scaling</span>`;
+    if(geo>=4&&econ>=3.5&&inst>=3.5)fh+=`<span class="flag" style="background:var(--color-background-success);color:var(--color-text-success)">Strong alignment across core modules — prioritise for pilot design</span>`;
+  }
+  if(rSum<wTotal*0.7)fh+=`<span style="font-size:10px;color:var(--color-text-tertiary)">Score based on ${Math.round((rSum/wTotal)*100)}% of framework — complete remaining modules for full picture</span>`;
+  fa.innerHTML=fh;
+}
+
+renderGrid();calcAll();
+</script>
