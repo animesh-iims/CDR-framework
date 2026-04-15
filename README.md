@@ -120,3 +120,8 @@ Animesh B.
 IIM Shillong
 
 ---
+
+## Live versions
+
+- **Current (v2):** https://animesh-iims.github.io/CDR-framework/
+- **Previous (v1):** https://animesh-iims.github.io/CDR-framework/v1.html
