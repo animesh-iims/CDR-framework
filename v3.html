@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CDR Cluster Suitability Framework: ERW & Biochar | India</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F4F1EA;
+  --surface: #FDFCFA;
+  --surface-2: #EAE7DF;
+  --surface-3: #DEDBD2;
+  --border: #D6D2C8;
+  --border-strong: #B8B3A8;
+  --text-1: #1A1815;
+  --text-2: #5A554C;
+  --text-3: #9A958C;
+
+  --erw: #1A3D2B;
+  --erw-mid: #2C6448;
+  --erw-pale: #EAF1EC;
+  --erw-border: #8EC4A0;
+
+  --bc: #623A10;
+  --bc-mid: #A35C20;
+  --bc-pale: #F5EDE2;
+  --bc-border: #D4A470;
+
+  --success: #265C3A;
+  --success-bg: #E6F2EB;
+  --success-border: #8DC4A4;
+  --warn: #7A4A10;
+  --warn-bg: #F8EFE0;
+  --warn-border: #D4A870;
+  --danger: #7A2020;
+  --danger-bg: #F5E6E6;
+  --danger-border: #D48080;
+  --info: #1E3E7A;
+  --info-bg: #E6ECF8;
+  --info-border: #9EB8E8;
+
+  --shadow-xs: 0 1px 2px rgba(26,24,21,.05);
+  --shadow-sm: 0 1px 4px rgba(26,24,21,.08);
+  --shadow: 0 2px 10px rgba(26,24,21,.09), 0 1px 3px rgba(26,24,21,.05);
+  --shadow-lg: 0 8px 28px rgba(26,24,21,.13), 0 2px 6px rgba(26,24,21,.06);
+
+  --r-sm: 6px;
+  --r: 10px;
+  --r-lg: 14px;
+  --r-xl: 18px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'DM Sans',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text-1);
+  font-size:14px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+.app{max-width:980px;margin:0 auto;padding:36px 22px 72px;}
+
+/* HEADER */
+.hd-eyebrow{font-size:10.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px;}
+.hd-title{font-family:'Fraunces',Georgia,serif;font-size:30px;font-weight:300;line-height:1.15;color:var(--text-1);margin-bottom:10px;}
+.hd-sub{font-size:14px;color:var(--text-2);max-width:580px;line-height:1.65;}
+
+/* DIVIDER */
+.rule{border:none;border-top:1px solid var(--border);margin:24px 0;}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;box-shadow:var(--shadow-xs);}
+.card-label{font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:14px;}
+
+/* CLUSTER PANEL */
+.cluster-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin-bottom:12px;}
+.field-label{display:block;font-size:11px;font-weight:500;color:var(--text-3);margin-bottom:4px;}
+.field-input{
+  width:100%;padding:8px 11px;
+  border:1px solid var(--border);border-radius:var(--r-sm);
+  background:var(--bg);font-family:'DM Sans',sans-serif;font-size:13px;
+  color:var(--text-1);outline:none;transition:border-color .15s,background .15s;
+}
+.field-input:focus{border-color:var(--border-strong);background:var(--surface);}
+.field-input::placeholder{color:var(--text-3);}
+
+.actions-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.api-note{font-size:11.5px;color:var(--text-3);margin-top:8px;line-height:1.5;}
+.api-note a{color:var(--info);text-decoration:none;}
+.api-note a:hover{text-decoration:underline;}
+
+.api-key-row{display:flex;gap:8px;margin-top:10px;align-items:center;}
+.api-key-row .field-input{font-family:monospace;font-size:12px;letter-spacing:.03em;}
+
+/* FETCH STATUS */
+.fetch-status{
+  display:none;align-items:center;gap:10px;
+  font-size:12.5px;color:var(--text-2);
+  padding:10px 14px;border-radius:var(--r-sm);
+  border:1px solid var(--info-border);background:var(--info-bg);
+  margin-top:10px;
+}
+.fetch-status.visible{display:flex;}
+.spinner{width:14px;height:14px;border:2px solid var(--info-border);border-top-color:var(--info);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* BUTTONS */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 15px;border-radius:var(--r-sm);
+  border:1px solid var(--border);
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.btn-primary{background:var(--text-1);color:#F4F1EA;border-color:var(--text-1);}
+.btn-primary:hover{background:#333;}
+.btn-ghost{background:transparent;color:var(--text-2);}
+.btn-ghost:hover{background:var(--surface-2);color:var(--text-1);}
+.btn-sm{padding:6px 11px;font-size:12px;}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+
+/* MODE BAR */
+.mode-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.mode-tabs{display:flex;gap:3px;background:var(--surface-2);padding:3px;border-radius:var(--r);border:1px solid var(--border);}
+.mode-tab{
+  padding:7px 20px;border-radius:7px;border:none;
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;
+  cursor:pointer;transition:all .2s;background:transparent;color:var(--text-2);
+}
+.mode-tab.act-erw{background:var(--erw);color:#F4F1EA;box-shadow:var(--shadow-sm);}
+.mode-tab.act-bc{background:var(--bc);color:#F4F1EA;box-shadow:var(--shadow-sm);}
+
+/* MODULE GRID */
+.mod-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+
+/* MODULE CARD */
+.mod-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 18px;box-shadow:var(--shadow-xs);}
+.mod-hd{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.mod-name{font-family:'Fraunces',Georgia,serif;font-size:15.5px;font-weight:300;color:var(--text-1);}
+.mod-meta{display:flex;align-items:center;gap:8px;}
+.mod-wt{font-size:11px;color:var(--text-3);}
+.mod-avg{font-size:14px;font-weight:600;min-width:32px;text-align:right;color:var(--text-1);font-variant-numeric:tabular-nums;}
+
+/* CRITERION ROW */
+.crit-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border);}
+.crit-lbl-wrap{flex:1;min-width:0;display:flex;align-items:center;gap:5px;}
+.crit-lbl{
+  font-size:12.5px;color:var(--text-2);line-height:1.35;
+  cursor:help;transition:color .1s;text-decoration:dotted underline;text-underline-offset:2px;text-decoration-color:transparent;
+}
+.crit-lbl:hover{color:var(--text-1);text-decoration-color:var(--border-strong);}
+.ko-tag{
+  flex-shrink:0;font-size:9px;font-weight:700;
+  color:var(--warn);background:var(--warn-bg);border:1px solid var(--warn-border);
+  padding:1px 5px;border-radius:3px;letter-spacing:.02em;
+}
+.auto-tag{
+  flex-shrink:0;font-size:9px;font-weight:700;
+  color:var(--info);background:var(--info-bg);border:1px solid var(--info-border);
+  padding:1px 5px;border-radius:3px;letter-spacing:.02em;
+}
+
+/* RATING BUTTONS */
+.r-btns{display:flex;gap:3px;flex-shrink:0;}
+.r-btn{
+  width:27px;height:27px;border-radius:50%;
+  border:1px solid var(--border);background:transparent;
+  cursor:pointer;font-size:11px;font-family:'DM Sans',sans-serif;font-weight:500;
+  color:var(--text-3);transition:all .12s;
+  display:flex;align-items:center;justify-content:center;
+}
+.r-btn:hover{border-color:var(--border-strong);color:var(--text-1);background:var(--surface-2);}
+.r-btn.sel-erw{background:var(--erw);border-color:var(--erw);color:#F4F1EA;font-weight:600;}
+.r-btn.sel-bc{background:var(--bc);border-color:var(--bc);color:#F4F1EA;font-weight:600;}
+.r-btn.sel-auto{background:var(--info);border-color:var(--info);color:#F4F1EA;font-weight:600;opacity:.85;}
+.r-btn.na-btn{border-style:dashed;font-size:9.5px;}
+.r-btn.sel-na{background:var(--surface-2);border-color:var(--border-strong);border-style:solid;color:var(--text-2);}
+
+/* MOD PROGRESS */
+.mod-prog{height:3px;background:var(--surface-3);border-radius:2px;margin-top:12px;overflow:hidden;}
+.mod-prog-fill{height:100%;border-radius:2px;transition:width .35s ease;}
+
+/* RESULTS PANEL */
+.results-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px;margin-bottom:14px;box-shadow:var(--shadow-xs);}
+.results-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
+.results-title{font-family:'Fraunces',Georgia,serif;font-size:16px;font-weight:300;color:var(--text-1);margin-bottom:3px;}
+.results-cov{font-size:12px;color:var(--text-3);}
+.tier-badge{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:20px;font-size:13px;font-weight:600;flex-shrink:0;}
+
+.score-row{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.score-bar-wrap{flex:1;height:8px;background:var(--surface-3);border-radius:4px;overflow:hidden;}
+.score-bar{height:100%;border-radius:4px;transition:width .4s ease,background .4s;}
+.score-num{font-size:30px;font-weight:600;min-width:52px;text-align:right;font-variant-numeric:tabular-nums;color:var(--text-1);}
+
+.mod-breakdown{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:14px;}
+.bd-item{text-align:center;}
+.bd-label{font-size:9px;color:var(--text-3);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bd-bar-wrap{height:4px;background:var(--surface-3);border-radius:2px;overflow:hidden;margin-bottom:3px;}
+.bd-bar{height:100%;border-radius:2px;transition:width .3s;}
+.bd-score{font-size:10px;color:var(--text-2);font-weight:500;}
+
+.flags-area{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.flag{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:400;padding:5px 10px;border-radius:6px;}
+
+/* CO-DEPLOYMENT PANEL */
+.co-panel{
+  background:linear-gradient(135deg,var(--erw-pale),var(--bc-pale));
+  border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 20px;margin-top:12px;display:none;
+}
+.co-panel.visible{display:block;}
+.co-title{font-family:'Fraunces',Georgia,serif;font-size:14px;font-weight:400;margin-bottom:6px;color:var(--text-1);}
+.co-body{font-size:12.5px;color:var(--text-2);line-height:1.6;}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:8px;}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2);}
+.leg-dot{width:8px;height:8px;border-radius:50%;}
+
+/* TOOLTIP */
+.tip-card{
+  position:fixed;z-index:9999;
+  background:#1A1815;color:#EDE9DF;
+  border-radius:var(--r);padding:13px 15px;max-width:290px;
+  font-size:12px;line-height:1.55;pointer-events:none;
+  opacity:0;transition:opacity .14s;box-shadow:var(--shadow-lg);
+}
+.tip-card.vis{opacity:1;}
+.tip-name{font-weight:600;font-size:12px;color:#C8C3BB;margin-bottom:9px;}
+.tip-row{margin-bottom:7px;}
+.tip-row:last-child{margin-bottom:0;}
+.tip-lv{font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:2px;}
+.tip-lv.hi{color:#7DD5A0;}
+.tip-lv.lo{color:#F09090;}
+.tip-txt{color:#A8A49C;font-size:11.5px;}
+.tip-ko{font-size:10px;color:#F5C57A;margin-top:8px;padding-top:7px;border-top:1px solid #333;}
+
+/* REPORT STYLES */
+#report-modal{
+  display:none;position:fixed;inset:0;z-index:9990;
+  background:rgba(26,24,21,.5);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;
+}
+#report-modal.open{display:flex;}
+.report-inner{
+  background:var(--surface);border-radius:var(--r-xl);
+  width:90vw;max-width:700px;max-height:88vh;
+  overflow-y:auto;padding:28px 32px;box-shadow:var(--shadow-lg);
+  position:relative;
+}
+.report-close{
+  position:absolute;top:16px;right:16px;
+  width:30px;height:30px;border-radius:50%;
+  border:1px solid var(--border);background:transparent;
+  cursor:pointer;font-size:16px;color:var(--text-2);
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.report-close:hover{background:var(--surface-2);}
+.rpt-h1{font-family:'Fraunces',Georgia,serif;font-size:22px;font-weight:300;margin-bottom:4px;}
+.rpt-meta{font-size:12px;color:var(--text-3);margin-bottom:20px;}
+.rpt-section{margin-bottom:18px;}
+.rpt-sh{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.rpt-score-big{font-size:40px;font-weight:600;font-variant-numeric:tabular-nums;}
+.rpt-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.rpt-row:last-child{border-bottom:none;}
+.rpt-crit-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0 4px 10px;border-bottom:1px dashed var(--border);font-size:12px;color:var(--text-2);}
+.rpt-crit-row:last-child{border-bottom:none;}
+.rpt-pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600;}
+
+/* RESPONSIVE */
+@media(max-width:660px){
+  .mod-grid{grid-template-columns:1fr;}
+  .cluster-grid{grid-template-columns:1fr 1fr;}
+  .mod-breakdown{grid-template-columns:repeat(4,1fr);}
+  .app{padding:20px 14px 56px;}
+  .hd-title{font-size:24px;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div style="margin-bottom:28px;">
+    <div class="hd-eyebrow">CDR Deployment &nbsp;·&nbsp; India &nbsp;·&nbsp; Agricultural Clusters</div>
+    <h1 class="hd-title">Cluster Suitability Framework</h1>
+    <p class="hd-sub">A modular scoring tool to prioritise ERW and biochar deployment zones across Indian agricultural clusters. Rate each criterion on a 1 (poor) to 5 (excellent) scale, or auto-fetch open-source data using cluster coordinates.</p>
+  </div>
+
+  <!-- CLUSTER PANEL -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-label">Cluster Identification</div>
+    <div class="cluster-grid">
+      <div>
+        <label class="field-label">Cluster / Zone Name</label>
+        <input class="field-input" id="inp-name" type="text" placeholder="e.g. Vidarbha Cotton Belt, Maharashtra">
+      </div>
+      <div>
+        <label class="field-label">Latitude</label>
+        <input class="field-input" id="inp-lat" type="number" step="0.001" placeholder="e.g. 20.700">
+      </div>
+      <div>
+        <label class="field-label">Longitude</label>
+        <input class="field-input" id="inp-lng" type="number" step="0.001" placeholder="e.g. 79.000">
+      </div>
+      <div>
+        <label class="field-label">Radius (km)</label>
+        <input class="field-input" id="inp-radius" type="number" step="5" min="5" max="300" placeholder="e.g. 50">
+      </div>
+    </div>
+    <p class="api-note" style="margin-bottom:10px;">Latitude and longitude mark the cluster centroid. Radius defines the cluster extent — the fetch will describe the area accordingly. A radius of 25–75 km suits most district-level clusters.</p>
+
+    <div class="actions-row">
+      <button class="btn btn-primary" onclick="fetchData()">
+        <span>Fetch open-source data</span>
+      </button>
+      <button class="btn btn-ghost" onclick="showManualNote()">Enter ratings manually</button>
+    </div>
+
+    <div class="api-key-row">
+      <div style="flex:1;">
+        <label class="field-label">OpenRouter API Key <span style="font-weight:400;color:var(--text-3)">(required for auto-fetch)</span></label>
+        <input class="field-input" id="inp-apikey" type="password" placeholder="sk-or-...">
+      </div>
+    </div>
+    <p class="api-note">Auto-fetch uses an AI model with web search to pre-fill ratings from soil, climate, geological and agricultural open-source datasets. Parameters with no available data are flagged for manual input. &nbsp;<a href="https://openrouter.ai/keys" target="_blank">Get OpenRouter key</a></p>
+
+    <div class="fetch-status" id="fetch-status">
+      <div class="spinner"></div>
+      <span id="fetch-msg">Searching for cluster data across soil, climate and geological sources...</span>
+    </div>
+  </div>
+
+  <!-- MODE BAR -->
+  <div class="mode-bar">
+    <div class="mode-tabs">
+      <button class="mode-tab act-erw" id="tab-erw" onclick="setMode('erw')">ERW</button>
+      <button class="mode-tab" id="tab-bc" onclick="setMode('biochar')">Biochar</button>
+    </div>
+    <div style="display:flex;gap:6px;">
+      <button class="btn btn-ghost btn-sm" onclick="openReport()">Download report</button>
+      <button class="btn btn-ghost btn-sm" onclick="resetCurrent()">Reset</button>
+    </div>
+  </div>
+
+  <!-- MODULE GRID -->
+  <div class="mod-grid" id="mod-grid"></div>
+
+  <!-- RESULTS -->
+  <div class="results-panel">
+    <div class="results-hd">
+      <div>
+        <div class="results-title">Overall cluster suitability</div>
+        <div class="results-cov" id="cov-text"></div>
+      </div>
+      <div id="tier-badge" class="tier-badge" style="background:var(--surface-2);color:var(--text-3);">Rate criteria to score</div>
+    </div>
+    <div class="score-row">
+      <div class="score-bar-wrap"><div class="score-bar" id="score-bar" style="width:0%"></div></div>
+      <div class="score-num" id="score-num">--</div>
+    </div>
+    <div class="mod-breakdown" id="mod-breakdown"></div>
+    <div class="flags-area" id="flags-area"></div>
+  </div>
+
+  <!-- CO-DEPLOYMENT PANEL -->
+  <div class="co-panel" id="co-panel">
+    <div class="co-title">Co-deployment synergy detected</div>
+    <div class="co-body" id="co-body"></div>
+  </div>
+
+  <!-- LEGEND -->
+  <hr class="rule">
+  <div class="legend">
+    <span style="font-size:11px;color:var(--text-3);font-weight:500;">Tiers:</span>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--success)"></div> 4.0-5.0 High priority</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#7A9A2A"></div> 3.0-3.9 Moderate</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--warn)"></div> 2.0-2.9 Conditional</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--danger)"></div> 1.0-1.9 Not viable</div>
+    <div class="leg-item" style="margin-left:8px;"><span style="font-size:11px;background:var(--warn-bg);border:1px solid var(--warn-border);padding:1px 5px;border-radius:3px;color:var(--warn);font-weight:700;">KO</span> Knockout criterion</div>
+    <div class="leg-item"><span style="font-size:11px;background:var(--info-bg);border:1px solid var(--info-border);padding:1px 5px;border-radius:3px;color:var(--info);font-weight:700;">AUTO</span> Auto-filled from open data</div>
+  </div>
+  <p style="font-size:11.5px;color:var(--text-3);line-height:1.6;max-width:620px;">Hover any parameter label for scoring guidance. Mark parameters as N/A if data is unavailable or obsolete; they are excluded from the weighted score with coverage noted. Knockout criteria rated 1-2 flag the cluster as undeployable in the current cycle regardless of composite score.</p>
+
+</div><!-- .app -->
+
+<!-- TOOLTIP -->
+<div class="tip-card" id="tip-card"></div>
+
+<!-- REPORT MODAL -->
+<div id="report-modal">
+  <div class="report-inner">
+    <button class="report-close" onclick="closeReport()">x</button>
+    <div id="report-content"></div>
+    <div style="display:flex;gap:8px;margin-top:20px;">
+      <button class="btn btn-primary" onclick="downloadReportHTML()">Download HTML</button>
+      <button class="btn btn-ghost" onclick="printReport()">Print / Save PDF</button>
+      <button class="btn btn-ghost" onclick="closeReport()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA MODEL
+// ============================================================
+const MK = ['geo','climate','agro','econ','inst','ops','mrv','market'];
+
+const M = {
+  geo: {
+    erw: { name:'Geophysical', w:20, col:'#1A3D2B' },
+    biochar: { name:'Feedstock', w:18, col:'#623A10' },
+    c: {
+      erw: [
+        { id:'basalt', lbl:'Basalt / silicate rock proximity', ko:true,
+          tip:{ hi:'Deccan Traps or equivalent silicate source within 50 km; quarry-to-farm logistics viable at below Rs 500/MT transport cost', lo:'No commercially viable silicate rock within 200 km; transport costs erode net CDR benefit and LCA efficiency critically', ko:'Critical knockout: score of 1-2 flags the cluster as non-deployable for ERW regardless of all other scores.' } },
+        { id:'ph', lbl:'Soil pH -- acidic soils score high', ko:true,
+          tip:{ hi:'Strongly acidic soils (pH 5.0-6.2); maximum liming co-benefit, fastest silicate weathering kinetics, bicarbonate CDR unimpeded', lo:'Already alkaline soils (pH above 7.5); ERW liming benefit disappears, bicarbonate-driven CDR significantly impeded, conditional knockout zone', ko:'Scoring direction: high score = acidic soil. Alkaline soils (pH above 7.5) are a conditional knockout for ERW.' } },
+        { id:'drainage', lbl:'Soil drainage class', ko:true,
+          tip:{ hi:'Well-drained loam or sandy-loam soils with clear waterway connectivity; bicarbonate exports freely to rivers and waterways', lo:'Waterlogged or poorly drained soils (common in eastern paddy systems); carbonate reprecipitation risk reduces CDR by up to 50% (Beerling et al. 2020)', ko:'Critical knockout for paddy-dominated clusters; poorly drained soils fundamentally compromise ERW CDR efficiency.' } },
+        { id:'texture', lbl:'Soil texture (loam / clay favoured)',
+          tip:{ hi:'Loam or clay-loam; good mineral-soil surface contact, slower leaching, efficient weathering and cation exchange', lo:'Coarse sandy soils; rapid leaching reduces mineral-soil contact time, lower ERW efficiency per tonne applied' } },
+        { id:'depletion', lbl:'Existing mineral depletion severity',
+          tip:{ hi:'Severely mineral-depleted soils; maximum nutrient co-benefit from ERW application, strongest farmer ROI case', lo:'Mineral-replete or recently fertilized soils; marginal additional benefit from ERW mineral input' } },
+      ],
+      biochar: [
+        { id:'avail', lbl:'Biomass feedstock availability', ko:true,
+          tip:{ hi:'Above 10 MT per year of agricultural residue accessible within 50 km radius; sufficient for commercial pyrolysis operation at scale', lo:'Below 1 MT per year available; insufficient scale for economically viable biochar production or carbon issuance', ko:'Critical knockout: without adequate feedstock volume, biochar deployment is not commercially or scientifically viable.' } },
+        { id:'additionality', lbl:'Feedstock additionality', ko:true,
+          tip:{ hi:'Biomass that would otherwise be openly burned or wasted; maximum additionality, strongest CDR integrity, credit credibility highest', lo:'Feedstock with high competing uses (animal bedding, brick kilns, cooking fuel, packaging); additionality contested, credit integrity at acute risk', ko:'The single most important integrity criterion. CDR credit validity collapses if feedstock displaces an existing beneficial use.' } },
+        { id:'stubble', lbl:'Stubble burning prevalence (India-specific)',
+          tip:{ hi:'High open-field burning rates (Punjab or Haryana profile); simultaneous additionality signal, air quality co-benefit, and alignment with state government stubble-burning reduction mandates', lo:'No significant stubble burning in cluster; residue already fully utilized, additionality case proportionally weaker' } },
+        { id:'landuse', lbl:'No land-use or food competition',
+          tip:{ hi:'Pure waste residue (rice straw, wheat stover, cotton stalks); zero land or food system displacement, no indirect land-use change', lo:'Dedicated energy crop or purpose-grown feedstock; indirect land-use change risk, potential food competition, significant lifecycle emissions' } },
+      ]
+    }
+  },
+  climate: {
+    erw: { name:'Climatic', w:15, col:'#264FA6' },
+    biochar: { name:'Climatic', w:10, col:'#264FA6' },
+    c: {
+      erw: [
+        { id:'rain', lbl:'Annual rainfall (above 800 mm optimal)', ko:true,
+          tip:{ hi:'Above 1000 mm annually, reliable monsoonal regime; sustained water flux activates weathering and bicarbonate export to waterways', lo:'Below 600 mm or highly erratic rainfall; below ERW activation threshold, weathering kinetics insufficient for meaningful CDR', ko:'Minimum viable threshold is approximately 600 mm with reasonable reliability.' } },
+        { id:'temp', lbl:'Mean annual temperature',
+          tip:{ hi:'Above 25 degrees C mean annual temperature; tropical weathering regime yields 1.2-1.6 tCO2/ha/yr vs approx 1.0 in temperate zones (Baek et al. 2023)', lo:'Below 18 degrees C; weathering kinetics substantially slowed, CDR rates approach temperate-zone baseline and below' } },
+        { id:'monsoon', lbl:'Monsoon reliability and seasonal distribution',
+          tip:{ hi:'Reliable 4-month monsoon with good spatial distribution; predictable water flux for weathering activation and bicarbonate export', lo:'Highly variable, spatially erratic, or drought-prone monsoon; deployment timing risk high, CDR efficiency unpredictable' } },
+      ],
+      biochar: [
+        { id:'drought', lbl:'Drought / moisture stress frequency',
+          tip:{ hi:'Chronically drought-prone cluster; biochar water retention benefit (15-20% irrigation reduction documented in Haryana wheat trials) at maximum value', lo:'Well-irrigated or perennially rainfed with surplus water; water retention co-benefit minimal, yield response dampened' } },
+        { id:'season', lbl:'Growing season length and multi-season potential',
+          tip:{ hi:'Above 8-month growing season with 2-3 crops annually; biochar soil benefit accrues across multiple crops, faster ROI realization', lo:'Short single season with long fallow; limited cumulative agronomic benefit, slower payback on biochar soil investment' } },
+        { id:'extremes', lbl:'Climate variability and extreme event exposure',
+          tip:{ hi:'High climate variability, frequent heat or drought events; biochar soil buffering value maximized, resilience co-benefit clearly stackable', lo:'Stable, low-variability climate; resilience co-benefit limited, weaker differentiation for premium pricing' } },
+      ]
+    }
+  },
+  agro: {
+    erw: { name:'Agronomic', w:15, col:'#3D7015' },
+    biochar: { name:'Soil Compatibility', w:15, col:'#3D7015' },
+    c: {
+      erw: [
+        { id:'crops', lbl:'Crop compatibility (paddy, tea, spices ranked highest)',
+          tip:{ hi:'Paddy, tea, sugarcane, or spices dominant; high soil contact time and wet conditions favour ERW silicate uptake and weathering', lo:'Dryland C4 cereals (maize, sorghum) on well-drained uplands; minimal ERW mineral interaction time, lower CDR per hectare' } },
+        { id:'yieldgap', lbl:'Yield gap vs achievable potential',
+          tip:{ hi:'Above 30% yield gap vs district yield potential; strong agronomic uplift case from ERW minerals, compelling farmer ROI narrative', lo:'Near-potential yields already achieved; minimal improvement room, agronomic ROI argument for farmer adoption is weak' } },
+        { id:'degrad', lbl:'Soil degradation and fertility decline severity',
+          tip:{ hi:'Severely degraded soils (low pH, micronutrient deficiency, compaction); maximum ERW agronomic response, strongest co-benefit stacking', lo:'Healthy, well-nourished soils with adequate mineral supply; marginal additional benefit from ERW mineral input' } },
+        { id:'inputs', lbl:'Fertilizer / input dependency',
+          tip:{ hi:'High chemical fertilizer use; strong cost-reduction co-benefit from ERW partial mineral substitution, clear farmer savings case', lo:'Low input use or predominantly organic farming; minimal fertilizer savings from ERW application, weak economics narrative' } },
+      ],
+      biochar: [
+        { id:'phcompat', lbl:'Soil pH compatibility (acidic soils score high)', ko:true,
+          tip:{ hi:'Acidic soils (pH 5.5-6.5); alkaline biochar creates beneficial pH correction, strong agronomic yield response documented', lo:'Already alkaline soils (pH above 7.5-8.0); alkaline biochar from agricultural residues worsens conditions -- can reduce P availability, increase salinity, harm soil microbiome', ko:'Alkaline soils are a conditional or full knockout for biochar. Applying alkaline char to already-alkaline soil can cause net agronomic harm.' } },
+        { id:'soildegrad', lbl:'Soil degradation / nutrient depletion severity',
+          tip:{ hi:'Degraded, low-OM soils; meta-analyses confirm 13% average yield increase and 28-39% SOC gain concentrated in degraded soils (multiple studies)', lo:'Already fertile, high-OM soils with good nutrient supply; marginal biochar response expected, agronomic co-benefit claim weaker' } },
+        { id:'soiltex', lbl:'Soil texture (sandy / coarse soils benefit most)',
+          tip:{ hi:'Sandy or coarse-textured soils; biochar water retention enhancement up to 30% WHC increase documented, dramatic yield response in dry climates', lo:'Heavy clay soils; structural improvement modest, water retention benefit limited, marginal yield response from biochar application' } },
+        { id:'waterstress', lbl:'Water stress / drought frequency',
+          tip:{ hi:'Drought-prone, high moisture stress; 15-20% irrigation reductions reported in Haryana wheat trials with biochar application', lo:'Well-irrigated with no moisture stress; water retention co-benefit irrelevant, key biochar value proposition not activated' } },
+      ]
+    }
+  },
+  econ: {
+    erw: { name:'Farmer Economics', w:20, col:'#A35C20' },
+    biochar: { name:'Farmer Economics', w:18, col:'#A35C20' },
+    c: {
+      erw: [
+        { id:'income', lbl:'HH income vs national median (Rs 13,661/mo)',
+          tip:{ hi:'Household income well below median (e.g. Jharkhand profile at approx Rs 4,895/mo); subsidy-receptive, high co-benefit sensitivity, strong inclusion case for concessional deployment', lo:'Income significantly above median; less incentive-sensitive to co-benefits, adoption requires demonstrated direct financial return without subsidies' } },
+        { id:'debt', lbl:'Debt burden (low debt = high score)',
+          tip:{ hi:'Low or manageable debt levels; farmer has financial capacity to absorb new input costs without acute liquidity risk', lo:'High indebtedness (55%+ debt-distressed common in MP and Jharkhand); risk-averse farmers, upfront cost adoption barriers very high' } },
+        { id:'roi', lbl:'Near-term ROI visibility within 1-2 seasons',
+          tip:{ hi:'Clear yield improvement or input cost savings demonstrable within 1 season; strongest adoption driver, critical for long-term retention', lo:'Long payback horizon or benefits primarily accrue to carbon market rather than farmer; high dropout risk as documented in Haryana and MP pilot studies' } },
+        { id:'holding', lbl:'Average holding size and cluster aggregation potential',
+          tip:{ hi:'Above 2 acres average holding; viable aggregation into economically meaningful clusters of 500+ acres for deployment', lo:'Extreme fragmentation (below 0.5 acres average); aggregation transaction costs are prohibitive, per-unit deployment economics collapse' } },
+        { id:'adopt', lbl:'Historical openness to new agronomic practices',
+          tip:{ hi:'Proven track record: SRI adoption, zero-tillage, biofortified varieties, or input-reduction schemes; change-readiness demonstrated at cluster level', lo:'No documented history of new practice adoption; high inertia, strong awareness investment required before any technical deployment' } },
+      ],
+      biochar: [
+        { id:'income', lbl:'HH income vs national median',
+          tip:{ hi:'Below national median; subsidy-receptive, co-benefit critical for adoption decision, strong case for carbon revenue sharing', lo:'Well above median; less subsidy-sensitive, requires demonstrated direct yield ROI without relying on carbon revenue' } },
+        { id:'debt', lbl:'Debt burden (low debt = high score)',
+          tip:{ hi:'Low debt burden; capacity to absorb new practice costs including any contribution to shared pyrolysis infrastructure', lo:'High debt; risk-averse, upfront costs untenable without deep subsidy or no-cost model' } },
+        { id:'roi', lbl:'Near-term soil improvement ROI visibility',
+          tip:{ hi:'Visible soil improvement and yield response within 1-2 seasons (documented for sandy degraded soils); strong pull for adoption', lo:'Long-term benefit only with no near-term visible ROI; adoption motivation weak, dropout risk high after initial season' } },
+        { id:'holding', lbl:'Holding size and FPO aggregation density',
+          tip:{ hi:'Above 2 acres average; aggregation into shared kiln economics is viable at cluster level', lo:'Below 0.5 acres extreme fragmentation; feedstock aggregation to pyrolysis facility is prohibitively costly per unit' } },
+        { id:'adopt', lbl:'Historical openness to new practices',
+          tip:{ hi:'Prior documented adoption of new agronomic or input practices; change-readiness demonstrated', lo:'No adoption history; high resistance, strong awareness campaign required before technical deployment' } },
+      ]
+    }
+  },
+  inst: {
+    erw: { name:'Institutional', w:14, col:'#5E50A0' },
+    biochar: { name:'Institutional', w:14, col:'#5E50A0' },
+    c: {
+      erw: [
+        { id:'fpo', lbl:'FPO presence, strength and last-mile reach', ko:true,
+          tip:{ hi:'Active FPO with above 500 registered members, operational field staff, and demonstrated farmer trust; critical delivery mechanism for ERW deployment at scale', lo:'No FPO present or dormant FPO with no operational capacity; no last-mile channel, deployment without aggregation is not commercially viable', ko:'FPO strength is a knockout: ERW at Indian smallholder scale requires aggregation infrastructure that only a functional FPO or equivalent can provide.' } },
+        { id:'govt', lbl:'Govt scheme alignment (PM-KISAN, Soil Health Card etc.)',
+          tip:{ hi:'Multiple active schemes aligned; ERW positioned as complementary to existing government investment, co-funding leverage achievable', lo:'No scheme alignment; standalone project without government co-investment, bureaucratic friction likely' } },
+        { id:'ext', lbl:'Extension service density and demonstrated quality',
+          tip:{ hi:'Dense, active extension network with proven farmer behaviour change track record; critical for sustained adoption beyond pilot season', lo:'No functional extension services in cluster; awareness and adoption support must be built from scratch at significant cost and time' } },
+        { id:'credit', lbl:'Credit / microfinance access for smallholders',
+          tip:{ hi:'Active MFI or NABARD presence; farmers have credit access to finance input changes without acute financial distress risk', lo:'No formal credit access; high informal interest rates (24-36% common), financial risk of any new practice adoption is acute' } },
+      ],
+      biochar: [
+        { id:'fpo', lbl:'FPO aggregation capacity and farmer trust', ko:true,
+          tip:{ hi:'Active FPO with proven feedstock aggregation capacity and farmer trust; critical for shared kiln economics and MRV simplification', lo:'No FPO or dormant; feedstock aggregation to pyrolysis facility not viable at scale, individual-level deployment economics collapse', ko:'FPO strength is a knockout for biochar: shared pyrolysis infrastructure, feedstock aggregation, and bundled MRV all require an operational cooperative structure.' } },
+        { id:'govt', lbl:'Govt scheme alignment and procurement linkages',
+          tip:{ hi:'Aligned with state stubble burning reduction targets, PM-KISAN, or NABARD scheme; co-investment leverage and policy tailwind', lo:'No government alignment; standalone project, no co-investment leverage, regulatory friction possible' } },
+        { id:'ext', lbl:'Extension service density and quality',
+          tip:{ hi:'Active extension with demonstrated agronomic practice change track record at cluster level', lo:'No extension services; significant awareness investment required from scratch before any technical deployment' } },
+        { id:'priorexp', lbl:'Prior CDR or sustainability project experience',
+          tip:{ hi:'Existing CDR or sustainability project (e.g. Mati Carbon, Carboneers, Varaha presence); validated logistics, farmer trust built, baseline data potentially available', lo:'No prior project; all trust-building, logistics, and baseline data work must be developed from zero -- high setup cost and time' } },
+      ]
+    }
+  },
+  ops: {
+    erw: { name:'Operational', w:8, col:'#B84020' },
+    biochar: { name:'Production & Technology', w:10, col:'#B84020' },
+    c: {
+      erw: [
+        { id:'supply', lbl:'Input supply chain (quarry to farm logistics)',
+          tip:{ hi:'Quarry within 50 km, reliable all-year transport corridor, existing bulk logistics infrastructure at reasonable cost', lo:'No nearby quarry; 200 km+ transport erodes net CDR benefit and makes project LCA economics unviable' } },
+        { id:'roads', lbl:'Road and transport infrastructure quality',
+          tip:{ hi:'All-weather paved roads to farm level; bulk rock dust transport feasible year-round without disruption', lo:'Seasonal or unpaved roads; inaccessible during monsoon, deployment timing constrained to a narrow window' } },
+        { id:'equip', lbl:'Spreading / application equipment availability',
+          tip:{ hi:'Spreading equipment locally available via FPO, rental market, or custom hiring centre (CHC); no capital investment required', lo:'No spreading capacity available; equipment must be imported and maintained -- significant capex barrier for project economics' } },
+        { id:'storage', lbl:'On-farm / warehouse storage capacity',
+          tip:{ hi:'Covered warehousing or on-farm storage near cluster; bulk purchase economics viable, price volatility risk managed', lo:'No storage infrastructure; just-in-time logistics required, price and availability volatility risk significantly elevated' } },
+      ],
+      biochar: [
+        { id:'pyrofit', lbl:'Pyrolysis technology scale-fitness',
+          tip:{ hi:'Technology type matches cluster structure: decentralized Kon-Tiki or batch kilns for fragmented smallholder clusters; industrial slow-pyrolysis for concentrated residue zones near sugar mills or rice processors', lo:'Technology mismatch: industrial plant in fragmented cluster or decentralized-only where concentration is optimal; adoption barriers and MRV complexity both elevated' } },
+        { id:'energy', lbl:'Energy infrastructure access',
+          tip:{ hi:'Grid electricity access at below Rs 7/kWh; industrial pyrolysis operations economically viable without off-grid premium', lo:'No grid access; off-grid dependency for industrial operations significantly increases OPEX and complicates economic modeling' } },
+        { id:'syngas', lbl:'Syngas / bio-oil co-product utilization potential',
+          tip:{ hi:'Clear syngas mini-grid or bio-oil industrial buyer pathway; project financially viable without relying solely on carbon revenue (critical for additionality demonstration)', lo:'No co-product market; entirely carbon-revenue dependent, financial viability fragile and additionality arguments complicated' } },
+        { id:'fpotech', lbl:'FPO / cooperative shared equipment capacity', ko:true,
+          tip:{ hi:'FPO owns or operates shared pyrolysis equipment; economies of scale achieved, feedstock aggregation efficient, MRV significantly simplified', lo:'No aggregation structure; individual-level operations only, unit economics and MRV complexity prohibitively high for credit issuance', ko:'Without cooperative equipment sharing, per-unit biochar economics and MRV costs make commercial deployment non-viable at Indian smallholder scale.' } },
+      ]
+    }
+  },
+  mrv: {
+    erw: { name:'MRV & Integrity', w:5, col:'#2E7070' },
+    biochar: { name:'MRV & Integrity', w:8, col:'#2E7070' },
+    c: {
+      erw: [
+        { id:'watersampling', lbl:'Water sampling and drainage connectivity',
+          tip:{ hi:'Rivers or waterways downstream of cluster; established water sampling infrastructure in place; bicarbonate export measurable and verifiable', lo:'No drainage connectivity; closed basin with no bicarbonate export pathway; ERW CDR measurement scientifically infeasible' } },
+        { id:'soillab', lbl:'Soil geochemistry lab access',
+          tip:{ hi:'NABL-accredited geochemistry lab within 100 km; turnaround below 7 days; ICP-MS or XRF capability available for ERW-grade analysis', lo:'Nearest certified lab above 200 km; long turnaround; specialist geochemical analysis effectively unavailable in region' } },
+        { id:'baseline', lbl:'Soil baseline and historical data availability',
+          tip:{ hi:'Multi-year Soil Health Card data or prior research baseline available; clear pre-intervention reference for additionality demonstration', lo:'No soil data available; expensive and time-consuming baseline construction required before any credit issuance can begin' } },
+        { id:'addleak', lbl:'Additionality and leakage risk clarity',
+          tip:{ hi:'No competing carbon programs in cluster; clean additionality, no double-counting risk, leakage scenario well-defined', lo:'Active SOC or other carbon schemes in same plots; additionality contested, leakage risk substantial, credit integrity at risk' } },
+      ],
+      biochar: [
+        { id:'feedtrace', lbl:'Feedstock chain traceability and documentation',
+          tip:{ hi:'Full farm-to-kiln-to-field documentation system in place or readily implementable; feedstock origin, mass, and type fully verifiable', lo:'No traceability system; feedstock provenance unverifiable, MRV burden very high, credit integrity fundamentally at risk' } },
+        { id:'pyrologs', lbl:'Pyrolysis monitoring and temperature logs',
+          tip:{ hi:'Continuous temperature monitoring with digital logs available; pyrolysis conditions verifiable for char quality assurance and permanence claims', lo:'No monitoring infrastructure; char quality and permanence scientifically unverifiable, premium credit issuance blocked' } },
+        { id:'charlabs', lbl:'Char quality lab access (H:C ratio, fixed carbon)',
+          tip:{ hi:'Certified char quality lab within 100 km; H:C ratio, fixed carbon content, and random reflectance measurements feasible at reasonable cost and turnaround', lo:'No certified char quality labs accessible in region; permanence verification infeasible, EBC or equivalent certification not achievable' } },
+        { id:'doublecounting', lbl:'Double-counting risk (SOC programme overlap)', ko:true,
+          tip:{ hi:'No active SOC-based carbon programmes in cluster; biochar-C clearly distinguishable, no analytical overlap risk', lo:'Cluster already participates in SOC carbon programmes; biochar-C is analytically indistinguishable from SOC by standard methods (Bucheli et al. 2024), double-counting risk acute and premium buyer scrutiny high', ko:'Emerging but critical integrity risk: biochar and SOC credits cannot be issued on the same plots without a clear analytical separation protocol.' } },
+      ]
+    }
+  },
+  market: {
+    erw: { name:'Carbon Market', w:3, col:'#5C5850' },
+    biochar: { name:'Carbon Market', w:7, col:'#4A4840' },
+    c: {
+      erw: [
+        { id:'demand', lbl:'Offtake / buyer demand for ERW credits',
+          tip:{ hi:'Active buyer MoU or LOI in place; credit off-take de-risked before deployment begins', lo:'No buyer interest; speculative market, revenue stream uncertain, project financing difficult to secure' } },
+        { id:'vcmccts', lbl:'VCM / CCTS regulatory readiness',
+          tip:{ hi:'VCM pathway active (Puro.earth, Isometric) AND CCTS 2026 methodology registered or anticipated; dual-market optionality and pricing upside', lo:'No pathway to credit issuance; ERW methodology not recognized by any registry, regulatory timeline unclear' } },
+        { id:'addclarity', lbl:'Additionality and baseline risk clarity',
+          tip:{ hi:'Clear financial additionality case; counterfactual well-defined, no competing claims, verifier-ready documentation', lo:'Baseline contested; additionality weak or disputed by verifiers, credit discount or rejection risk high' } },
+        { id:'cobenefit', lbl:'Co-benefit stacking potential',
+          tip:{ hi:'Strong water quality, biodiversity, and farmer income co-benefits documentable and stackable into premium credit pricing', lo:'Carbon-only credit; no stacking premium achievable, price anchored to commodity CDR market floor' } },
+      ],
+      biochar: [
+        { id:'demand', lbl:'Offtake demand for high-permanence biochar credits',
+          tip:{ hi:'Active buyer (Puro.earth, Carbonfuture, corporate buyer) with stated demand for India biochar; off-take secured or near-secured', lo:'No buyer interest; speculative market with long lead time to first revenue' } },
+        { id:'permanence', lbl:'Carbon permanence rating strength',
+          tip:{ hi:'High fixed carbon content (above 80%) achievable from feedstock and pyrolysis conditions; centuries-class permanence, EBC Premium certification pathway open', lo:'Low stability char expected from feedstock or low-temperature pyrolysis; short-term permanence only, premium credit tier not accessible' } },
+        { id:'vcmccts', lbl:'VCM / CCTS regulatory readiness',
+          tip:{ hi:'India CCTS 2026 methodology registered or in pipeline for biochar; VCM pathway (Puro.earth etc.) already active; dual optionality', lo:'No recognized methodology; regulatory uncertainty, credit issuance timeline unclear' } },
+        { id:'cobenefit', lbl:'Soil, air quality and community co-benefits',
+          tip:{ hi:'Strong soil health improvement, yield gains, and air quality benefit from stubble burning reduction documentable; significant premium pricing support', lo:'Carbon-only benefit; co-benefit stacking not viable, price limited to commodity biochar credit market' } },
+      ]
+    }
+  }
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let mode = 'erw';
+const R = { erw:{}, biochar:{} };
+const AUTO = { erw:{}, biochar:{} }; // auto-fetched ratings with metadata
+let autoSources = {}; // param_id -> {note, source, conf}
+let fetchedLocation = '';
+
+// ============================================================
+// TOOLTIP
+// ============================================================
+const tipEl = document.getElementById('tip-card');
+let tipTimeout = null;
+
+function showTip(el, mk, cid, ev) {
+  const m = M[mk];
+  const crits = m.c[mode];
+  const c = crits.find(x => x.id === cid);
+  if (!c || !c.tip) return;
+  const t = c.tip;
+  let html = `<div class="tip-name">${c.lbl.replace(/ \(.*/, '')}</div>`;
+  html += `<div class="tip-row"><div class="tip-lv hi">Score 4-5 when:</div><div class="tip-txt">${t.hi}</div></div>`;
+  html += `<div class="tip-row"><div class="tip-lv lo">Score 1-2 when:</div><div class="tip-txt">${t.lo}</div></div>`;
+  if (t.ko) html += `<div class="tip-ko">Knockout: ${t.ko}</div>`;
+  tipEl.innerHTML = html;
+  positionTip(ev || el.getBoundingClientRect());
+  tipEl.classList.add('vis');
+}
+
+function positionTip(ev) {
+  const x = (ev.clientX || (ev.left + ev.width / 2)) + 14;
+  const y = ev.clientY || ev.top;
+  const tw = 290, th = 160;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  tipEl.style.left = Math.min(x, vw - tw - 10) + 'px';
+  tipEl.style.top = Math.min(y - 10, vh - th - 10) + 'px';
+}
+
+function moveTip(ev) {
+  positionTip(ev);
+}
+
+function hideTip() {
+  tipEl.classList.remove('vis');
+}
+
+// ============================================================
+// RATING
+// ============================================================
+function rate(mk, cid, val) {
+  if (!R[mode][mk]) R[mode][mk] = {};
+  R[mode][mk][cid] = val;
+  renderCard(mk);
+  calcAll();
+  checkCoDeployment();
+}
+
+function rateNA(mk, cid) {
+  if (!R[mode][mk]) R[mode][mk] = {};
+  const cur = R[mode][mk][cid];
+  R[mode][mk][cid] = cur === 'na' ? undefined : 'na';
+  renderCard(mk);
+  calcAll();
+}
+
+function resetCurrent() {
+  R[mode] = {};
+  AUTO[mode] = {};
+  renderGrid();
+  calcAll();
+}
+
+// ============================================================
+// SCORING
+// ============================================================
+function modAvg(mk) {
+  const crits = M[mk].c[mode];
+  const r = R[mode][mk] || {};
+  const vals = crits.map(c => r[c.id]).filter(v => v !== undefined && v !== 'na' && v > 0);
+  if (!vals.length) return 0;
+  return vals.reduce((a, b) => a + b, 0) / vals.length;
+}
+
+function modCoveredWeight(mk) {
+  const crits = M[mk].c[mode];
+  const r = R[mode][mk] || {};
+  const rated = crits.filter(c => r[c.id] !== undefined && r[c.id] !== 'na' && r[c.id] > 0);
+  return rated.length > 0 ? M[mk][mode].w : 0;
+}
+
+function calcAll() {
+  let wSum = 0, wRated = 0, wTotal = 0;
+  const kFails = [];
+
+  MK.forEach(mk => {
+    const avg = modAvg(mk);
+    const w = M[mk][mode].w;
+    wTotal += w;
+    if (avg > 0) { wSum += avg * w; wRated += w; }
+    const crits = M[mk].c[mode];
+    const r = R[mode][mk] || {};
+    crits.forEach(c => {
+      if (c.ko && r[c.id] !== undefined && r[c.id] !== 'na' && r[c.id] <= 2) {
+        kFails.push(c.lbl.split('(')[0].trim().replace(/\s+--\s+.*/, '').trim());
+      }
+    });
+  });
+
+  renderBreakdown();
+
+  const barEl = document.getElementById('score-bar');
+  const numEl = document.getElementById('score-num');
+  const tierEl = document.getElementById('tier-badge');
+  const covEl = document.getElementById('cov-text');
+  const flagsEl = document.getElementById('flags-area');
+
+  if (wRated === 0) {
+    barEl.style.width = '0%';
+    numEl.textContent = '--';
+    tierEl.textContent = 'Rate criteria to score';
+    tierEl.style.background = 'var(--surface-2)';
+    tierEl.style.color = 'var(--text-3)';
+    covEl.textContent = '';
+    flagsEl.innerHTML = '';
+    return;
+  }
+
+  const score = wSum / wRated;
+  const pct = ((score - 1) / 4) * 100;
+  const covPct = Math.round((wRated / wTotal) * 100);
+
+  barEl.style.width = pct.toFixed(1) + '%';
+  numEl.textContent = score.toFixed(2);
+  covEl.textContent = covPct + '% of framework rated';
+
+  let tier, tierBg, tierCol, barCol;
+  if (score >= 4) { tier = 'High priority'; tierBg = 'var(--success-bg)'; tierCol = 'var(--success)'; barCol = '#2C6448'; }
+  else if (score >= 3) { tier = 'Moderate priority'; tierBg = '#EDF4E0'; tierCol = '#4A7A1A'; barCol = '#5A8A20'; }
+  else if (score >= 2) { tier = 'Conditional'; tierBg = 'var(--warn-bg)'; tierCol = 'var(--warn)'; barCol = '#A85C20'; }
+  else { tier = 'Not viable'; tierBg = 'var(--danger-bg)'; tierCol = 'var(--danger)'; barCol = '#8A2020'; }
+
+  barEl.style.background = barCol;
+  tierEl.textContent = tier;
+  tierEl.style.background = tierBg;
+  tierEl.style.color = tierCol;
+
+  let flags = '';
+  kFails.forEach(lbl => {
+    flags += `<span class="flag" style="background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger-border);">Knockout triggered: ${lbl}</span>`;
+  });
+
+  if (!kFails.length) {
+    const econAvg = modAvg('econ'), instAvg = modAvg('inst'), opsAvg = modAvg('ops'), geoAvg = modAvg('geo');
+    if (econAvg > 0 && econAvg < 2.5) flags += `<span class="flag" style="background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-border);">Farmer risk: direct subsidy or risk-sharing required before deployment</span>`;
+    if (instAvg > 0 && instAvg < 2.5) flags += `<span class="flag" style="background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-border);">Institutional gap: FPO-building must precede technical deployment</span>`;
+    if (opsAvg > 0 && opsAvg < 2.5) flags += `<span class="flag" style="background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-border);">Operational bottleneck: address supply chain before scaling</span>`;
+    if (geoAvg >= 4 && econAvg >= 3.5 && instAvg >= 3.5) flags += `<span class="flag" style="background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);">Strong alignment across core modules -- prioritise for pilot design</span>`;
+  }
+
+  if (covPct < 70) flags += `<span style="font-size:11.5px;color:var(--text-3);padding:4px 2px;">Score based on ${covPct}% of framework -- complete remaining modules for full picture</span>`;
+
+  flagsEl.innerHTML = flags;
+}
+
+function renderBreakdown() {
+  const bd = document.getElementById('mod-breakdown');
+  bd.innerHTML = MK.map(mk => {
+    const avg = modAvg(mk);
+    const col = M[mk][mode].col;
+    const pct = avg > 0 ? Math.round(((avg - 1) / 4) * 100) : 0;
+    const shortNames = { geo:'Geophysical', climate:'Climatic', agro:'Agronomic / Soil', econ:'Economics', inst:'Institutional', ops:'Operational / Tech', mrv:'MRV', market:'Carbon Mkt' };
+    return `<div class="bd-item">
+      <div class="bd-label">${shortNames[mk]}</div>
+      <div class="bd-bar-wrap"><div class="bd-bar" style="width:${pct}%;background:${col}"></div></div>
+      <div class="bd-score">${avg > 0 ? avg.toFixed(1) : '--'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function renderGrid() {
+  const g = document.getElementById('mod-grid');
+  g.innerHTML = MK.map(mk => `<div class="mod-card" id="card-${mk}"></div>`).join('');
+  MK.forEach(mk => renderCard(mk));
+}
+
+function renderCard(mk) {
+  const m = M[mk];
+  const modeData = m[mode];
+  const crits = m.c[mode];
+  const r = R[mode][mk] || {};
+  const autoR = AUTO[mode][mk] || {};
+  const avg = modAvg(mk);
+  const pct = avg > 0 ? ((avg - 1) / 4) * 100 : 0;
+  const selClass = mode === 'erw' ? 'sel-erw' : 'sel-bc';
+
+  const rows = crits.map(c => {
+    const cur = r[c.id];
+    const isAuto = autoR[c.id] !== undefined && cur === autoR[c.id];
+    const isNA = cur === 'na';
+
+    const btns = [1, 2, 3, 4, 5].map(n => {
+      let cls = 'r-btn';
+      if (cur === n) cls += isAuto ? ' sel-auto' : ` ${selClass}`;
+      return `<button class="${cls}" onclick="rate('${mk}','${c.id}',${n})" onmousemove="moveTip(event)" onmouseenter="showTip(this,'${mk}','${c.id}',event)" onmouseleave="hideTip()">${n}</button>`;
+    }).join('');
+
+    const naCls = 'r-btn na-btn' + (isNA ? ' sel-na' : '');
+    const naBtn = `<button class="${naCls}" title="Mark as not available / data unavailable" onclick="rateNA('${mk}','${c.id}')">N/A</button>`;
+
+    const koTag = c.ko ? `<span class="ko-tag">KO</span>` : '';
+    const autoTag = isAuto ? `<span class="auto-tag">AUTO</span>` : '';
+
+    return `<div class="crit-row">
+      <div class="crit-lbl-wrap">
+        <span class="crit-lbl" onmouseenter="showTip(this,'${mk}','${c.id}',event)" onmousemove="moveTip(event)" onmouseleave="hideTip()">${c.lbl}</span>
+        ${koTag}${autoTag}
+      </div>
+      <div class="r-btns">${btns}${naBtn}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('card-' + mk).innerHTML = `
+    <div class="mod-hd">
+      <span class="mod-name">${modeData.name}</span>
+      <div class="mod-meta">
+        <span class="mod-wt">wt: ${modeData.w}%</span>
+        <span class="mod-avg">${avg > 0 ? avg.toFixed(1) : '--'}</span>
+      </div>
+    </div>
+    ${rows}
+    <div class="mod-prog"><div class="mod-prog-fill" style="width:${pct.toFixed(1)}%;background:${modeData.col}"></div></div>`;
+}
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('tab-erw').className = 'mode-tab' + (m === 'erw' ? ' act-erw' : '');
+  document.getElementById('tab-bc').className = 'mode-tab' + (m === 'biochar' ? ' act-bc' : '');
+  renderGrid();
+  calcAll();
+  checkCoDeployment();
+}
+
+// ============================================================
+// CO-DEPLOYMENT
+// ============================================================
+function checkCoDeployment() {
+  const erwScore = calcScore('erw');
+  const bcScore = calcScore('biochar');
+  const panel = document.getElementById('co-panel');
+  const body = document.getElementById('co-body');
+  if (erwScore >= 3.5 && bcScore >= 3.5) {
+    body.textContent = `Both ERW (${erwScore.toFixed(2)}) and Biochar (${bcScore.toFixed(2)}) score above 3.5 independently for this cluster. Peer-reviewed evidence confirms co-deployment can be additive (Te Pas et al. 2026; Frontiers in Climate 2025). This cluster should be flagged for co-deployment potential evaluation -- an opportunity CEEW 2025 identifies as systematically underutilised in current India CDR strategy.`;
+    panel.classList.add('visible');
+  } else {
+    panel.classList.remove('visible');
+  }
+}
+
+function calcScore(m) {
+  let wSum = 0, wRated = 0;
+  MK.forEach(mk => {
+    const crits = M[mk].c[m];
+    const r = R[m][mk] || {};
+    const vals = crits.map(c => r[c.id]).filter(v => v !== undefined && v !== 'na' && v > 0);
+    if (vals.length) {
+      const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+      wSum += avg * M[mk][m].w;
+      wRated += M[mk][m].w;
+    }
+  });
+  return wRated > 0 ? wSum / wRated : 0;
+}
+
+// ============================================================
+// DATA FETCH (OpenRouter API)
+// ============================================================
+async function fetchData() {
+  const lat = document.getElementById('inp-lat').value.trim();
+  const lng = document.getElementById('inp-lng').value.trim();
+  const name = document.getElementById('inp-name').value.trim();
+  const apiKey = document.getElementById('inp-apikey').value.trim();
+  const radiusRaw = document.getElementById('inp-radius').value.trim();
+  const radius = radiusRaw ? parseFloat(radiusRaw) : null;
+
+  if (!lat || !lng) { alert('Please enter latitude and longitude coordinates to fetch data.'); return; }
+  if (!apiKey) { alert('Please enter your OpenRouter API key to use auto-fetch.'); return; }
+
+  const statusEl = document.getElementById('fetch-status');
+  const msgEl = document.getElementById('fetch-msg');
+  statusEl.classList.add('visible');
+  msgEl.textContent = 'Searching soil, climate, geological and agricultural data sources for this location...';
+
+  const critsList = (m) => MK.map(mk => {
+    return M[mk].c[m].map(c => `${mk}.${c.id}: "${c.lbl}"`).join('\n');
+  }).join('\n');
+
+  const areaDesc = radius
+    ? `The cluster spans approximately a ${radius} km radius (~${Math.round(Math.PI * radius * radius).toLocaleString()} km² area) around this centroid.`
+    : 'No cluster radius was specified; treat this as a district-scale area.';
+
+  const prompt = `You are a CDR deployment data analyst with expertise in Indian agricultural zones and soil science. A user has entered these coordinates: latitude ${lat}, longitude ${lng}${name ? ` (cluster name: ${name})` : ''}. ${areaDesc}
+
+Using web search, research current open-source data on this location from sources such as:
+- NBSS soil atlas, ICAR soil surveys, FAO soil data
+- IMD climate records, WorldClim, OpenWeatherMap
+- GSI geological maps (for basalt/Deccan Traps proximity)
+- APEDA, DAC, NSSO agricultural and socioeconomic data
+- State agriculture department reports
+- Published CDR or biochar deployment studies in the region
+
+Then rate ALL of the following parameters on a scale of 1 (poor/unfavorable) to 5 (excellent/highly favorable).
+
+ERW parameters:
+${critsList('erw')}
+
+Biochar parameters:
+${critsList('biochar')}
+
+Return ONLY a valid JSON object with NO markdown, NO explanation, NO prefix text:
+{
+  "location_name": "...",
+  "state": "...",
+  "summary": "2-3 sentences describing the cluster's key CDR characteristics",
+  "erw": {
+    "geo": { "basalt": {"v":3,"conf":"high","note":"...","src":"..."}, "ph": {...}, "drainage": {...}, "texture": {...}, "depletion": {...} },
+    "climate": { "rain": {...}, "temp": {...}, "monsoon": {...} },
+    "agro": { "crops": {...}, "yieldgap": {...}, "degrad": {...}, "inputs": {...} },
+    "econ": { "income": {...}, "debt": {...}, "roi": {...}, "holding": {...}, "adopt": {...} },
+    "inst": { "fpo": {...}, "govt": {...}, "ext": {...}, "credit": {...} },
+    "ops": { "supply": {...}, "roads": {...}, "equip": {...}, "storage": {...} },
+    "mrv": { "watersampling": {...}, "soillab": {...}, "baseline": {...}, "addleak": {...} },
+    "market": { "demand": {...}, "vcmccts": {...}, "addclarity": {...}, "cobenefit": {...} }
+  },
+  "biochar": {
+    "geo": { "avail": {...}, "additionality": {...}, "stubble": {...}, "landuse": {...} },
+    "climate": { "drought": {...}, "season": {...}, "extremes": {...} },
+    "agro": { "phcompat": {...}, "soildegrad": {...}, "soiltex": {...}, "waterstress": {...} },
+    "econ": { "income": {...}, "debt": {...}, "roi": {...}, "holding": {...}, "adopt": {...} },
+    "inst": { "fpo": {...}, "govt": {...}, "ext": {...}, "priorexp": {...} },
+    "ops": { "pyrofit": {...}, "energy": {...}, "syngas": {...}, "fpotech": {...} },
+    "mrv": { "feedtrace": {...}, "pyrologs": {...}, "charlabs": {...}, "doublecounting": {...} },
+    "market": { "demand": {...}, "permanence": {...}, "vcmccts": {...}, "cobenefit": {...} }
+  },
+  "missing": ["list of param paths like geo.basalt where no data was found"],
+  "data_notes": "..."
+}
+
+Confidence levels: "high" | "medium" | "low". If a parameter truly cannot be determined, omit it from the module object and add it to missing[].`;
+
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': window.location.href,
+        'X-Title': 'CDR Cluster Suitability Framework'
+      },
+      body: JSON.stringify({
+        model: 'perplexity/sonar',
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `API error ${res.status}`);
+    }
+
+    const data = await res.json();
+    const text = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No JSON found in response. The model may have returned an explanation instead of data — try again or enter ratings manually.');
+
+    const result = JSON.parse(jsonMatch[0]);
+    applyAutoRatings(result);
+
+    fetchedLocation = result.location_name || `${lat}, ${lng}`;
+    msgEl.textContent = `Data loaded for ${fetchedLocation}. ${result.data_notes || ''} Auto-filled parameters shown with AUTO badge. Review and override any ratings.`;
+
+  } catch (e) {
+    msgEl.textContent = `Fetch error: ${e.message}. Please check your OpenRouter API key and try again, or enter ratings manually.`;
+  }
+}
+
+function applyAutoRatings(result) {
+  ['erw', 'biochar'].forEach(m => {
+    if (!result[m]) return;
+    AUTO[m] = {};
+    MK.forEach(mk => {
+      const modData = result[m][mk];
+      if (!modData) return;
+      AUTO[m][mk] = {};
+      M[mk].c[m].forEach(c => {
+        const d = modData[c.id];
+        if (d && d.v && d.v >= 1 && d.v <= 5) {
+          AUTO[m][mk][c.id] = d.v;
+          if (!R[m][mk]) R[m][mk] = {};
+          R[m][mk][c.id] = d.v;
+        }
+      });
+    });
+  });
+  renderGrid();
+  calcAll();
+  checkCoDeployment();
+}
+
+function showManualNote() {
+  const msgEl = document.getElementById('fetch-msg');
+  const statusEl = document.getElementById('fetch-status');
+  statusEl.classList.add('visible');
+  msgEl.textContent = 'Manual mode: hover any parameter label for scoring guidance (HIGH vs LOW descriptions). Mark N/A for parameters where data is unavailable or obsolete.';
+}
+
+// ============================================================
+// REPORT
+// ============================================================
+function openReport() {
+  document.getElementById('report-content').innerHTML = buildReport();
+  document.getElementById('report-modal').classList.add('open');
+}
+
+function closeReport() {
+  document.getElementById('report-modal').classList.remove('open');
+}
+
+function buildReport() {
+  const clusterName = document.getElementById('inp-name').value || fetchedLocation || 'Unnamed Cluster';
+  const lat = document.getElementById('inp-lat').value;
+  const lng = document.getElementById('inp-lng').value;
+  const radius = document.getElementById('inp-radius').value;
+  const dateStr = new Date().toLocaleDateString('en-IN', { year:'numeric', month:'long', day:'numeric' });
+  const modeName = mode === 'erw' ? 'Enhanced Rock Weathering (ERW)' : 'Biochar';
+
+  let coordStr = '';
+  if (lat && lng) {
+    coordStr = ` &nbsp;|&nbsp; ${lat}, ${lng}`;
+    if (radius) coordStr += ` (r=${radius} km)`;
+  }
+
+  const score = calcScore(mode);
+  let tier, tierBg, tierCol;
+  if (score >= 4) { tier = 'High Priority'; tierBg = '#E6F2EB'; tierCol = '#265C3A'; }
+  else if (score >= 3) { tier = 'Moderate Priority'; tierBg = '#EDF4E0'; tierCol = '#4A7A1A'; }
+  else if (score >= 2) { tier = 'Conditional'; tierBg = '#F8EFE0'; tierCol = '#7A4A10'; }
+  else if (score > 0) { tier = 'Not Viable'; tierBg = '#F5E6E6'; tierCol = '#7A2020'; }
+  else { tier = 'Incomplete'; tierBg = '#F4F1EA'; tierCol = '#9A958C'; }
+
+  let modRows = '';
+  let critRows = '';
+  const kos = [];
+  const naList = [];
+
+  MK.forEach(mk => {
+    const modeData = M[mk][mode];
+    const crits = M[mk].c[mode];
+    const r = R[mode][mk] || {};
+    const avg = modAvg(mk);
+    const rated = crits.filter(c => r[c.id] !== undefined && r[c.id] !== 'na' && r[c.id] > 0).length;
+    const total = crits.length;
+
+    modRows += `<div class="rpt-row"><span style="font-weight:500">${modeData.name}</span><span style="display:flex;gap:8px;align-items:center"><span style="font-size:11px;color:#9A958C">${rated}/${total} rated &nbsp;wt:${modeData.w}%</span><span style="font-weight:700;min-width:28px;text-align:right">${avg > 0 ? avg.toFixed(2) : 'n/a'}</span></span></div>`;
+
+    crits.forEach(c => {
+      const v = r[c.id];
+      const isNA = v === 'na';
+      const isAuto = AUTO[mode][mk] && AUTO[mode][mk][c.id] === v;
+      const isKO = c.ko && v !== undefined && v !== 'na' && v <= 2;
+
+      if (isKO) kos.push(c.lbl.split('(')[0].trim().replace(/\s+--\s+.*/, '').trim());
+      if (isNA) naList.push({ mod: modeData.name, lbl: c.lbl });
+
+      const displayV = isNA ? 'N/A' : (v !== undefined ? v : '--');
+      const autoNote = isAuto ? ' (auto)' : '';
+      const koMark = isKO ? ' KNOCKOUT' : '';
+
+      critRows += `<div class="rpt-crit-row" style="${isKO ? 'color:#7A2020;font-weight:500' : ''}">
+        <span>${c.lbl.replace(/ \(.*/, '')}${c.ko ? ' (KO criterion)' : ''}${autoNote}</span>
+        <span style="font-weight:600;min-width:28px;text-align:right">${displayV}${koMark}</span>
+      </div>`;
+    });
+  });
+
+  const flagsHtml = kos.length
+    ? kos.map(k => `<div style="color:${tierCol};margin-bottom:4px;">Knockout triggered: ${k}</div>`).join('')
+    : '<div style="color:#265C3A;">No knockout criteria triggered.</div>';
+
+  const naHtml = naList.length
+    ? naList.map(x => `<div style="font-size:12px;color:#9A958C;margin-bottom:2px;">${x.mod}: ${x.lbl.split('(')[0].trim()} -- marked N/A</div>`).join('')
+    : '<div style="font-size:12px;color:#9A958C;">All rated parameters have scores.</div>';
+
+  return `
+    <div class="rpt-h1">CDR Cluster Suitability Report</div>
+    <div class="rpt-meta">${clusterName}${coordStr} &nbsp;|&nbsp; ${modeName} &nbsp;|&nbsp; ${dateStr}</div>
+
+    <div class="rpt-section">
+      <div class="rpt-sh">Overall Score</div>
+      <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:10px;">
+        <span class="rpt-score-big" style="color:${tierCol}">${score > 0 ? score.toFixed(2) : '--'}</span>
+        <span class="rpt-pill" style="background:${tierBg};color:${tierCol}">${tier}</span>
+      </div>
+      <div style="height:8px;background:#EAE7DF;border-radius:4px;overflow:hidden;margin-bottom:10px;">
+        <div style="height:100%;width:${score > 0 ? ((score-1)/4*100).toFixed(1) : 0}%;background:${tierCol};border-radius:4px;"></div>
+      </div>
+      <div style="font-size:11.5px;color:#9A958C;">Tiers: 4.0-5.0 High priority | 3.0-3.9 Moderate | 2.0-2.9 Conditional | Below 2.0 Not viable</div>
+    </div>
+
+    <div class="rpt-section">
+      <div class="rpt-sh">Module Scores</div>
+      ${modRows}
+    </div>
+
+    <div class="rpt-section">
+      <div class="rpt-sh">Decision Flags</div>
+      ${flagsHtml}
+    </div>
+
+    <div class="rpt-section">
+      <div class="rpt-sh">Unavailable Data</div>
+      ${naHtml}
+    </div>
+
+    <div class="rpt-section">
+      <div class="rpt-sh">Criterion Detail</div>
+      ${critRows}
+    </div>
+
+    <div style="font-size:11px;color:#9A958C;margin-top:12px;border-top:1px solid #D6D2C8;padding-top:10px;">
+      Generated by CDR Cluster Suitability Framework v3.0 &nbsp;|&nbsp; ${dateStr}
+    </div>`;
+}
+
+// Opens the report in a fresh window — solves the print/PDF repetition bug caused by
+// position:fixed modal repeating on every printed page in the main tool window.
+function printReport() {
+  const clusterName = document.getElementById('inp-name').value || fetchedLocation || 'cluster';
+  const content = buildReport();
+  const fullHtml = buildReportDocument(clusterName, content);
+  const w = window.open('', '_blank');
+  w.document.write(fullHtml);
+  w.document.close();
+  w.onload = () => { w.focus(); w.print(); };
+}
+
+function downloadReportHTML() {
+  const clusterName = document.getElementById('inp-name').value || fetchedLocation || 'cluster';
+  const safeN = clusterName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+  const modeName = mode === 'erw' ? 'erw' : 'biochar';
+  const content = buildReport();
+  const full = buildReportDocument(clusterName, content);
+  const blob = new Blob([full], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `CDR_Report_${safeN}_${modeName}.html`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function buildReportDocument(title, content) {
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CDR Report - ${title}</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#FDFCFA;color:#1A1815;padding:48px;max-width:800px;margin:0 auto;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+.rpt-h1{font-family:'Fraunces',serif;font-size:26px;font-weight:300;margin-bottom:6px;color:#1A1815;}
+.rpt-meta{font-size:12px;color:#9A958C;margin-bottom:24px;}
+.rpt-section{margin-bottom:20px;page-break-inside:avoid;}
+.rpt-sh{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#9A958C;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #D6D2C8;}
+.rpt-score-big{font-size:42px;font-weight:600;}
+.rpt-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #D6D2C8;font-size:13px;}
+.rpt-row:last-child{border-bottom:none;}
+.rpt-crit-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0 4px 12px;border-bottom:1px dashed #D6D2C8;font-size:12px;color:#5A554C;}
+.rpt-crit-row:last-child{border-bottom:none;}
+.rpt-pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600;}
+@media print{
+  body{padding:24px;}
+  .rpt-section{page-break-inside:avoid;}
+}
+</style></head><body>${content}</body></html>`;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderGrid();
+calcAll();
+</script>
+</body>
+</html>
